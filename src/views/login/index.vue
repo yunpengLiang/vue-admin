@@ -19,6 +19,11 @@
                     <el-input type="password" v-model="ruleForm.password" autocomplete="off" minlength="6" maxlength="20"></el-input>
                 </el-form-item>
 
+                <el-form-item  prop="passwords" class="item-form" v-if="model==='register'">
+                     <label>重复密码</label>
+                    <el-input type="password" v-model="ruleForm.passwords" autocomplete="off" minlength="6" maxlength="20"></el-input>
+                </el-form-item>
+
                 <el-form-item  prop="code" class="item-form">
                      <label>验证码</label>
                      <el-row :gutter="10">
@@ -33,34 +38,33 @@
                 </el-form-item>
 
                 <el-form-item>
-                    <el-button type="danger" class="login-btn block" @click="submitForm('ruleForm')">提交</el-button>
+                    <el-button type="danger" class="login-btn block"   @click="submitForm('ruleForm')">{{menuTab[0].txt}}</el-button>
                 </el-form-item>
             </el-form>
         </div>
     </div>
 </template>
 <script>
+import {stripscript,validateEmail,validatePass,validateCheckCode} from "@/utils/validate";
 export default {
     // 当前模块名称
     name:'login',
     data(){
         // 验证验证码
         var checkCode = (rule, value, callback) => {
-            let reg = /^[a-z0-9]{6}$/;
             if (value === '') {
                 callback(new Error('请输入验证码'));
-            } else if (!reg.test(value)) {
+            } else if (validateCheckCode(value)) {
                 callback(new Error('验证码格式有误!'));
             } else {
                 callback();
             }
         };
-        // 验证用户名
+        // 验证用户名邮箱
         var validateUsername = (rule, value, callback) => {
-            let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
             if (value === '') {
                 callback(new Error('请输入用户名'));
-            } else if(!reg.test(value)){
+            } else if(validateEmail(value)){
                 callback(new Error('用户名格式有误！'));
             }else{
                 callback();//
@@ -68,24 +72,42 @@ export default {
         };
         // 验证密码
         var validatePassword = (rule, value, callback) => {
-            let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
+            // 当前密码框的值等于过滤后的数据
+            this.ruleForm.password = stripscript(value);
+            value = this.ruleForm.password;
             if (value === '') {
                 callback(new Error('请输入密码'));
-            } else if (!reg.test(value)) {
+            } else if (validatePass(value)) {
                 callback(new Error('密码为6-20位的数字加字母!'));
+            } else {
+                callback();
+            }
+        };
+        // 验证重复密码
+        var validatePasswords = (rule, value, callback) => {
+            // 当前密码框的值等于过滤后的数据
+            this.ruleForm.passwords = stripscript(value);
+            value = this.ruleForm.passwords;
+            if (value === '') {
+                callback(new Error('请再次输入密码'));
+            } else if (value != this.ruleForm.password) {
+                callback(new Error('重复密码不正确!'));
             } else {
                 callback();
             }
         };
         return{
             menuTab:[
-                {txt:'登录',current:true},
-                {txt:'注册',current:false}
+                {txt:'登录',current:true,type:'login'},
+                {txt:'注册',current:false,type:'register'}
             ],
+            // 模块的值
+            model:'login',
             // isActive:true
             ruleForm: {
                 username: '',
                 password: '',
+                passwords: '',
                 code: ''
             },
             rules: {
@@ -94,6 +116,9 @@ export default {
                 ],
                 password: [
                     { validator: validatePassword, trigger: 'blur' }
+                ],
+                passwords: [
+                    { validator: validatePasswords, trigger: 'blur' }
                 ],
                 code: [
                     { validator: checkCode, trigger: 'blur' }
@@ -110,11 +135,24 @@ export default {
         toggleMenu(data){
             this.menuTab.forEach((elem,index) => {
                 elem.current = false;
-                console.log(elem.current,'aaaa');
             });
-            console.log(this.menuTab,'1111');
             // 高光
             data.current=true;
+            // 修改模块的值
+            this.model = data.type;
+        },
+        submitForm(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    alert('submit!');
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            });
+        },
+        resetForm(formName) {
+            this.$refs[formName].resetFields();
         }
     },
     props:{},
