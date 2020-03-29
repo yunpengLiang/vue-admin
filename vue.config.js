@@ -5,7 +5,7 @@ module.exports = {
   // 输出文件目录
   outputDir: process.env.NODE_ENV === "production" ? "dist" : "devdist",
   // eslint-loader 是否在保存的时候检查
-  lintOnSave: false,
+  lintOnSave: true,
   /**
    * webpack配置,see https://github.com/vuejs/vue-cli/blob/dev/docs/webpack.md
    **/
@@ -56,7 +56,15 @@ module.exports = {
     https: false, // 编译失败时刷新页面
     hot: true, // 开启热加载
     hotOnly: false,
-    proxy: null, // 设置代理
+    proxy: {
+      "/devApi":{
+        target:"http://www.web-jshtml.cn/productapi",//API服务器地址
+        changeOrigin:true,
+        pathRewrite:{
+          "^/devApi":""
+        }
+      }
+    }, // 设置代理
     overlay: {
       // 全屏模式下是否显示脚本错误
       warnings: true,
