@@ -83,7 +83,8 @@
                         type="danger"
                         class="login-btn block"
                         @click="submitForm('ruleForm')"
-                        >{{ menuTab[indexnum].txt }}</el-button
+                        :disabled="loginButtonStatus"
+                        >{{ model === "login" ? "登录" : "注册" }}</el-button
                     >
                 </el-form-item>
             </el-form>
@@ -106,8 +107,19 @@ import {
 export default {
     // 当前模块名称
     name: "login",
-    // setup(props,context){
-    setup(props, { refs }) {
+    // setup(props, context) {
+    // console.log(context);
+    /**
+         *  root: (...) == this
+            parent: (...) == this.parent
+            refs: (...) == this.refs
+            attrs: (...) == this.$attrs
+            listeners: (...) == this.$listeners
+            isServer: (...) == this.$isServer
+            ssrContext: (...) == this.$ssrContext
+            emit: (...) == this.$emit
+         */
+    setup(props, { refs, root }) {
         // 验证验证码
         let checkCode = (rule, value, callback) => {
             if (value === "") {
@@ -155,10 +167,27 @@ export default {
             }
         };
         const getSms = () => {
+            // 进行提示
+            if (ruleForm.username == "") {
+                root.$message.error("用户名不能为空！");
+                return false;
+            }
+            if (validateEmail(ruleForm.username)) {
+                root.$message.error("邮箱格式错误！");
+                return false;
+            }
+            // 请求接口
             let data = {
-                username: ruleForm.username
+                username: ruleForm.username,
+                module: "login"
             };
-            GetSms(data);
+            GetSms(data)
+                .then(response => {
+                    console.log(response);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
         };
         // 这里放置data数据，生命周期，自定义的函数，对象类型使用reactive来声明
         const menuTab = reactive([
@@ -168,7 +197,8 @@ export default {
         // console.log(menuTab);
         // 声明数据类型为基础数据类型,取值的话需要使用变量名.value
         const model = ref("login");
-        const indexnum = ref("0");
+        // 登录按钮禁用状态
+        const loginButtonStatus = ref(true);
         const ruleForm = reactive({
             username: "",
             password: "",
@@ -192,8 +222,7 @@ export default {
         onMounted(() => {});
         // 声明函数
         // 数据驱动视图
-        const toggleMenu = (data, index) => {
-            indexnum.value = index;
+        const toggleMenu = data => {
             menuTab.forEach(elem => {
                 elem.current = false;
             });
@@ -218,12 +247,12 @@ export default {
         return {
             menuTab,
             model,
-            indexnum,
             ruleForm,
             rules,
             toggleMenu,
             submitForm,
             getSms,
+            loginButtonStatus,
             resetForm
         };
     },
