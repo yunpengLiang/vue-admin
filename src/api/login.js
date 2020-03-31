@@ -19,7 +19,21 @@ export function GetSms(data) {
 /**
  * 登录
  */
-
+export function Login(data) {
+    return service.request({
+        method: "post",
+        url: "/login/",
+        data
+    });
+}
 /**
  * 注册
  */
+export function Register(data) {
+    return service.request({
+        method: "post",
+        url: "/register/",
+        // data: data   在ES6中左边的data时后台接收的，右边的时接收的参数时，可以只写一个data
+        data
+    });
+}

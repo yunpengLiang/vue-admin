@@ -18,7 +18,7 @@
                 :model="ruleForm"
                 status-icon
                 :rules="rules"
-                ref="ruleForm"
+                ref="loginForm"
                 class="login-form"
                 size="medium"
             >
@@ -62,7 +62,7 @@
                     <el-row :gutter="10">
                         <el-col :span="15">
                             <el-input
-                                v-model.number="ruleForm.code"
+                                v-model="ruleForm.code"
                                 minlength="6"
                                 maxlength="6"
                             ></el-input>
@@ -72,7 +72,8 @@
                                 type="success"
                                 class="block"
                                 @click="getSms()"
-                                >获取验证码</el-button
+                                :disabled="codeButtonStatus.status"
+                                >{{ codeButtonStatus.text }}</el-button
                             >
                         </el-col>
                     </el-row>
@@ -82,7 +83,7 @@
                     <el-button
                         type="danger"
                         class="login-btn block"
-                        @click="submitForm('ruleForm')"
+                        @click="submitForm('loginForm')"
                         :disabled="loginButtonStatus"
                         >{{ model === "login" ? "登录" : "注册" }}</el-button
                     >
@@ -92,7 +93,7 @@
     </div>
 </template>
 <script>
-import { GetSms } from "@/api/login.js";
+import { GetSms, Register, Login } from "@/api/login.js";
 import {
     reactive,
     ref,
@@ -166,6 +167,10 @@ export default {
                 callback();
             }
         };
+        /**
+         * ***************************************************************************************************************
+         * 获取验证码
+         */
         const getSms = () => {
             // 进行提示
             if (ruleForm.username == "") {
@@ -176,19 +181,59 @@ export default {
                 root.$message.error("邮箱格式错误！");
                 return false;
             }
+            // 设置获取验证码按钮状态为禁用
+            codeButtonStatus.status = true;
+            codeButtonStatus.text = "发送中...";
             // 请求接口
             let data = {
                 username: ruleForm.username,
-                module: "login"
+                module: model.value
             };
             GetSms(data)
                 .then(response => {
-                    console.log(response);
+                    let data = response.data;
+                    root.$message({
+                        message: data.message,
+                        type: "success"
+                    });
+                    loginButtonStatus.value = false;
+                    countDown(60);
                 })
                 .catch(error => {
                     console.log(error);
                 });
         };
+
+        // 倒计时
+        const countDown = number => {
+            // 判断定时器是否存在，存在则清除
+            if (timer.value) {
+                clearInterval(timer.value);
+            }
+            // setTimeout只会执行一次
+            // setInterval会不断执行，需要条件才会停止
+            let time = number;
+            timer.value = setInterval(() => {
+                time--;
+                if (time === 0) {
+                    clearInterval(timer.value);
+                    codeButtonStatus.status = false;
+                    codeButtonStatus.text = "重新获取";
+                } else {
+                    codeButtonStatus.text = `倒计时${time}秒`;
+                }
+            }, 1000);
+        };
+        // 清除倒计时
+        const clearCountDown = () => {
+            clearInterval(timer.value);
+            codeButtonStatus.status = false;
+            codeButtonStatus.text = "获取验证码";
+        };
+        /**
+         * **********************************************************************************************************************************
+         * 定义变量
+         */
         // 这里放置data数据，生命周期，自定义的函数，对象类型使用reactive来声明
         const menuTab = reactive([
             { txt: "登录", current: true, type: "login" },
@@ -199,6 +244,13 @@ export default {
         const model = ref("login");
         // 登录按钮禁用状态
         const loginButtonStatus = ref(true);
+        // 验证码禁用按钮
+        const codeButtonStatus = reactive({
+            status: false,
+            text: "获取验证码"
+        });
+        // 倒计时
+        const timer = ref(null);
         const ruleForm = reactive({
             username: "",
             password: "",
@@ -222,6 +274,10 @@ export default {
         onMounted(() => {});
         // 声明函数
         // 数据驱动视图
+        /**
+         * ******************************************************************************************************************
+         * 登陆注册相互切换
+         */
         const toggleMenu = data => {
             menuTab.forEach(elem => {
                 elem.current = false;
@@ -230,16 +286,70 @@ export default {
             data.current = true;
             // 修改模块的值
             model.value = data.type;
+            // 重置表单,loginForm是表单rel的属性的值，可以直接refs.loginForm,也可以refs["loginForm"]
+            refs.loginForm.resetFields();
+            clearCountDown();
         };
+        /**
+         * ********************************************************************************************************************
+         * 提交
+         */
         const submitForm = formName => {
             refs[formName].validate(valid => {
                 if (valid) {
-                    alert("submit!");
+                    model.value === "login" ? login() : register();
                 } else {
                     console.log("error submit!!");
                     return false;
                 }
             });
+        };
+        /**
+         * ********************************************************************************************************************
+         * 登陆
+         */
+        const login = () => {
+            let requestData = {
+                username: ruleForm.username,
+                password: ruleForm.password,
+                code: ruleForm.code
+            };
+            Login(requestData)
+                .then(response => {
+                    console.log(response);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        };
+        /**
+         * ********************************************************************************************************************
+         * 注册
+         */
+        const register = () => {
+            let requestData = {
+                username: ruleForm.username,
+                password: ruleForm.password,
+                passwords: ruleForm.passwords,
+                code: ruleForm.code,
+                model: "register"
+            };
+            Register(requestData)
+                .then(response => {
+                    let data = response.data;
+                    root.$message({
+                        message: data.message,
+                        type: "success"
+                    });
+                    // 设置model的值为login，清除定时器，显示登陆界面
+
+                    clearCountDown();
+                    toggleMenu(menuTab[0]);
+                })
+                .catch(error => {
+                    clearCountDown();
+                    console.log(error);
+                });
         };
         const resetForm = formName => {
             refs[formName].resetFields();
@@ -252,7 +362,9 @@ export default {
             toggleMenu,
             submitForm,
             getSms,
+            countDown,
             loginButtonStatus,
+            codeButtonStatus,
             resetForm
         };
     },
