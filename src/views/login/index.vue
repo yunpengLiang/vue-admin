@@ -282,6 +282,9 @@ export default {
             Login(requestData)
                 .then(response => {
                     console.log(response);
+                    root.$router.push({
+                        name: "console"
+                    });
                 })
                 .catch(error => {
                     console.log(error);
