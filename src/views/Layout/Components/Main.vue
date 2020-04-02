@@ -1,8 +1,12 @@
 <template>
-    <div id="main-wrap"></div>
+    <div id="main-wrap">
+        <router-view></router-view>
+    </div>
 </template>
 <script>
-export default {};
+export default {
+    name: "index"
+};
 </script>
 <style lang="scss" scoped>
 @import "../../../styles/config.scss";

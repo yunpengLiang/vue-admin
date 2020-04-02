@@ -1,9 +1,10 @@
 <template>
-    <div>控制台</div>
+    <div>用户列表</div>
 </template>
 <script>
 export default {
-    name: "console"
+    name: "userIndex"
+    // setup(props) {}
 };
 </script>
 <style lang="scss" scoped></style>

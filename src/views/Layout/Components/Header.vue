@@ -1,5 +1,5 @@
 <template>
-    <div id="header-wrap"></div>
+    <div id="header-wrap">头部</div>
 </template>
 <script>
 export default {};

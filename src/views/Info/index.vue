@@ -1,9 +1,10 @@
 <template>
-    <div>控制台</div>
+    <div>信息管理</div>
 </template>
 <script>
 export default {
-    name: "console"
+    name: "infoIndex"
+    // setup(props) {}
 };
 </script>
 <style lang="scss" scoped></style>
