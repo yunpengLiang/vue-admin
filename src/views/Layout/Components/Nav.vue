@@ -1,5 +1,6 @@
 <template>
     <div id="nav-wrap">
+        <img src="../../../images/logo.png" alt="logo" />
         <el-menu
             default-active="1-4-1"
             class="el-menu-vertical-demo"
@@ -12,9 +13,16 @@
             router
         >
             <template v-for="(item, index) in routers">
-                <el-submenu v-if="!item.hidden" :key="item.id" :index="index">
+                <el-submenu
+                    v-if="!item.hidden"
+                    :key="item.id"
+                    :index="index + ''"
+                >
                     <template slot="title">
-                        <i class="el-icon-location"></i>
+                        <svg-icon
+                            :className="item.meta.icon"
+                            :iconClass="item.meta.icon"
+                        />
                         <span slot="title">{{ item.meta.name }}</span>
                     </template>
                     <el-menu-item
@@ -34,8 +42,6 @@ export default {
     name: "navMenu",
     setup(props, { root }) {
         const routers = reactive(root.$router.options.routes);
-        console.log(routers);
-
         /****************************************************
         elementUI自带方法
          */
@@ -64,5 +70,14 @@ export default {
     width: $navMenu;
     height: 100vh;
     background-color: #344a5f;
+    svg {
+        font-size: 20px;
+        margin-right: 10px;
+        color: #fff;
+    }
+}
+#nav-wrap > img {
+    display: block;
+    margin: 30px auto;
 }
 </style>

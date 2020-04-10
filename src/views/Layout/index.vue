@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="layout-wrap">
         <LayoutHeader />
         <LayoutNav />
         <LayoutMain />
@@ -15,4 +15,8 @@ export default {
     setup() {}
 };
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+#layout-wrap {
+    background-color: #f7f7f7;
+}
+</style>
