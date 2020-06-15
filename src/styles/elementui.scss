@@ -11,3 +11,15 @@
         background-color: $mainColor !important;
     }
 }
+.el-menu--vertical{
+    >ul{
+        padding: 0 !important;
+    }
+    .el-menu-item{
+        background-color: $secondColor !important;
+        line-height: 56px;
+    }
+    .el-menu-item:hover{
+        background-color: $mainColor !important;
+    }
+}

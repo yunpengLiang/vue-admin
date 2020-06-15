@@ -1,11 +1,9 @@
 <template>
     <div id="nav-wrap">
-        <img src="../../../images/logo.png" alt="logo" />
+        <img src="../../../images/logo.png" alt="logo" class="logo" />
         <el-menu
             default-active="1-4-1"
             class="el-menu-vertical-demo"
-            @open="handleOpen"
-            @close="handleClose"
             :collapse="isCollapse"
             background-color="transparent"
             text-color="#FFF"
@@ -37,26 +35,18 @@
     </div>
 </template>
 <script>
-import { ref, reactive } from "@vue/composition-api";
+import { /**ref,*/ reactive, computed } from "@vue/composition-api";
 export default {
     name: "navMenu",
     setup(props, { root }) {
         const routers = reactive(root.$router.options.routes);
         /****************************************************
-        elementUI自带方法
+        computed监听
          */
-        const isCollapse = ref(false);
-        const handleOpen = (key, keyPath) => {
-            console.log(key, keyPath);
-        };
-        const handleClose = (key, keyPath) => {
-            console.log(key, keyPath);
-        };
+        const isCollapse = computed(() => root.$store.state.app.isCollapse);
         return {
             routers,
-            isCollapse,
-            handleOpen,
-            handleClose
+            isCollapse
         };
     }
 };
@@ -70,6 +60,7 @@ export default {
     width: $navMenu;
     height: 100vh;
     background-color: #344a5f;
+    @include webkit(transition, all 0.3s ease 0s);
     svg {
         font-size: 20px;
         margin-right: 10px;
@@ -79,5 +70,21 @@ export default {
 #nav-wrap > img {
     display: block;
     margin: 30px auto;
+    @include webkit(transition, all 0.3s ease 0s);
+}
+.open {
+    #nav-wrap {
+        width: $navMenu;
+    }
+}
+.close {
+    #nav-wrap {
+        width: 64px;
+        .logo {
+            margin: auto;
+            margin-top: 30px;
+            width: 70%;
+        }
+    }
 }
 </style>

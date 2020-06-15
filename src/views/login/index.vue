@@ -94,7 +94,7 @@
 </template>
 <script>
 import sha1 from "js-sha1";
-import { GetSms, Register, Login } from "@/api/login.js";
+import { GetSms, Register } from "@/api/login.js";
 import {
     reactive,
     ref,
@@ -279,11 +279,12 @@ export default {
                 password: sha1(ruleForm.password),
                 code: ruleForm.code
             };
-            Login(requestData)
+            root.$store
+                .dispatch("app/login", requestData)
                 .then(response => {
                     console.log(response);
                     root.$router.push({
-                        name: "console"
+                        name: "Console"
                     });
                 })
                 .catch(error => {

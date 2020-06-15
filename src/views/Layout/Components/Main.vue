@@ -7,7 +7,10 @@
 </template>
 <script>
 export default {
-    name: "index"
+    name: "layoutMain",
+    setup(props, { root }) {
+        console.log(props, root);
+    }
 };
 </script>
 <style lang="scss" scoped>
